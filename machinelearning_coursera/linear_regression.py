@@ -4,14 +4,26 @@ import matplotlib.pyplot as plt
 
 class LinearRegression:
 
-    def __init__(self, strategy='gradient_descent', max_iter=1000, learning_rate=0.01, normalize=False):
+    """
+
+    Class for performing linear regression in a training set.
+
+    """
+
+    def __init__(
+        self,
+        strategy="gradient_descent",
+        max_iter=1000,
+        learning_rate=0.01,
+        normalize=False,
+    ):
 
         self.strategy = strategy
         self.coefficients = None
         self._cost = np.inf
         self.max_iter = max_iter
         self.learning_rate = learning_rate
-        self.threshold = learning_rate * 1E-2
+        self.threshold = learning_rate * 1e-2
         self.n_iter = None
         self.final_cost = None
         self.normalize = normalize
@@ -28,12 +40,12 @@ class LinearRegression:
 
         """
 
-        if self.strategy == 'gradient_descent':
+        if self.strategy == "gradient_descent":
             self.gradient_descent_fit(x, y)
-        elif self.strategy == 'normal_eq':
+        elif self.strategy == "normal_eq":
             self.normal_equation_fit(x, y)
         else:
-            print('Invalid strategy')
+            print("Invalid strategy")
 
     def gradient_descent_fit(self, x, y):
 
@@ -69,7 +81,7 @@ class LinearRegression:
                 break
             if self._cost - prev_cost > 0:
                 self.learning_rate = self.learning_rate * 0.1
-                print('Updated learning rate: {}: {}'.format(i, self.learning_rate))
+                print("Updated learning rate: {}: {}".format(i, self.learning_rate))
 
             i += 1
 
@@ -100,7 +112,7 @@ class LinearRegression:
     def predict(self, x):
 
         if self.coefficients is None:
-            return 'There is no model fitted'
+            return "There is no model fitted"
 
         X = np.c_[np.ones(x.shape[0]), x]
 
@@ -154,11 +166,18 @@ class LinearRegression:
 
     @staticmethod
     def plot_costs(costs):
+
+        """
+        :param costs: 2-D array, consisting of the
+        number of iterations and associated cost
+        :return: None
+        """
+
         plt.figure(figsize=(10, 10))
 
         plt.plot(costs[:, 0], costs[:, 1])
 
-        plt.xlabel('Nr Iterations')
-        plt.ylabel('J(\u03B8)')
+        plt.xlabel("Nr Iterations")
+        plt.ylabel("J(\u03B8)")
 
         plt.show()
