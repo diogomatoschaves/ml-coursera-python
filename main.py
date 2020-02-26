@@ -15,11 +15,12 @@ df.columns = ['area', 'bedroom', 'price']
 x = df[['area', 'bedroom']].to_numpy()
 y = df.price.to_numpy()
 
-scaler = StandardScaler()
-x = scaler.fit_transform(x)
-y = scaler.fit_transform(np.reshape(y, (-1, 1))).ravel()
+# scaler = StandardScaler()
+# x = scaler.fit_transform(x)
+# y = scaler.fit_transform(np.reshape(y, (-1, 1))).ravel()
 
-reg = LinearRegression(max_iter=100000, learning_rate=0.001, normalize=False)
+reg = LinearRegression(max_iter=100000, learning_rate=0.001, normalize=True)
+# reg = LinearRegression(strategy='normal_eq')
 # reg = LinearRegression()
 reg.fit(x, y)
 
