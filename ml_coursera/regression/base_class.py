@@ -1,29 +1,20 @@
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 
 
-class LinearRegression:
-
-    """
-
-    Class for performing linear regression in a training set.
+class Regression:
 
     """
+    Base class for linear and logistic regression
+    """
 
-    def __init__(
-        self,
-        strategy="gradient_descent",
-        max_iter=1000,
-        learning_rate=0.01,
-        normalize=False,
-    ):
+    def __init__(self, max_iter, learning_rate, normalize):
 
-        self.strategy = strategy
         self.coefficients = None
         self._cost = np.inf
         self.max_iter = max_iter
         self.learning_rate = learning_rate
-        self.threshold = learning_rate * 1e-2
+        self.threshold = learning_rate * 1e-3
         self.n_iter = None
         self.final_cost = None
         self.normalize = normalize
@@ -40,15 +31,33 @@ class LinearRegression:
 
         """
 
-        if self.strategy == "gradient_descent":
-            self.gradient_descent_fit(x, y)
-        elif self.strategy == "normal_eq":
-            self.normal_equation_fit(x, y)
-        else:
-            print("Invalid strategy")
+        self._gradient_descent_fit(x, y)
 
-    def gradient_descent_fit(self, x, y):
+    def predict(self, x):
 
+        """
+        :param x: array of m predicting cases by n features
+        :return: predicted values for x based on fitted model
+
+        Predicts the values for a given input array x
+
+        """
+
+        raise NotImplementedError
+
+    def score(self, x, y_true):
+        """
+        :param x: m x n array of m examples by n features
+        :param y_true: 1-D array of m examples of true target values
+        :return: the score of the model
+
+        Outputs the score of model.
+
+        """
+
+        raise NotImplementedError
+
+    def _gradient_descent_fit(self, x, y):
         """
         :param x: matrix with m training examples x n features
         :param y: vector with m target values
@@ -70,17 +79,18 @@ class LinearRegression:
         i = 0
         while i < self.max_iter:
 
-            theta = self.gradient_descent(X, y, theta)
-
             prev_cost = self._cost
-            self._cost = self.cost_function(X, y, theta)
+            self._cost = self._cost_function(X, y, theta)
+            theta = theta - self.learning_rate * self._gradient(X, y, theta)
 
             costs = np.vstack((costs, np.array([[i, self._cost]])))
 
             if abs(self._cost - prev_cost) < self.threshold:
                 break
+
             if self._cost - prev_cost > 0:
                 self.learning_rate = self.learning_rate * 0.1
+                self.threshold = self.learning_rate * 1e-3
                 print("Updated learning rate: {}: {}".format(i, self.learning_rate))
 
             i += 1
@@ -91,35 +101,22 @@ class LinearRegression:
 
         self.plot_costs(costs)
 
-    def normal_equation_fit(self, x, y):
+    def _gradient(self, X, y, theta):
 
         """
-        :param x: matrix with m training examples x n features
-        :param y: vector with m target values
-        :return: None
+        :param X: training data matrix of m examples and n + 1 features
+        :param y: vector of m target values
+        :param theta: vector of n + 1 parameters for target line
+        :return: gradient for a given theta
 
-        Fits the training data and the target values following
-        the normal equation strategy
+        Computes the new values of theta according to gradient
+        descent formula.
 
         """
 
-        X = np.c_[np.ones(x.shape[0]), x]
+        return (1 / X.shape[0]) * X.T @ (self._hypothesis(X @ theta) - y)
 
-        theta = np.linalg.inv(X.T @ X) @ X.T @ y
-
-        self.coefficients = theta
-
-    def predict(self, x):
-
-        if self.coefficients is None:
-            return "There is no model fitted"
-
-        X = np.c_[np.ones(x.shape[0]), x]
-
-        return self.coefficients.T @ X.T
-
-    def cost_function(self, X, y, theta):
-
+    def _cost_function(self, X, y, theta):
         """
         :param X: matrix of m training examples and n + 1 features
         :param y: vector of m target values
@@ -127,36 +124,32 @@ class LinearRegression:
         :return: cost
 
         Computes the value of the cost function for a given X, y and theta
-        with the following equation:
 
-        J(theta) = (1 / 2m) * (X*theta - y)' (X*theta - y)
-        """
-
-        self._cost = (1 / (2 * len(X))) * (X @ theta - y).T @ (X @ theta - y)
-
-        return self._cost
-
-    def gradient_descent(self, X, y, theta):
-
-        """
-        :param X: training data matrix of m examples and n + 1 features
-        :param y: vector of m target values
-        :param theta: vector of n + 1 parameters for target line
-        :param learning_rate: learning rate of the model
-        :return: Updated theta vector
-
-        Computes the new values of theta according to gradient
-        descent formula.
+        To be implemented on each child class.
 
         """
 
-        return theta - (self.learning_rate / X.shape[0]) * X.T @ (X @ theta - y)
+        raise NotImplementedError
+
+    def _hypothesis(self, matrix):
+        """
+        :param matrix: receives as input the result of X . theta
+        :return: same object as received
+
+        This implementation is for the base case, of the hypothesis being
+        equivalent to X . theta. For Logistic regression, the hypothesis
+        is the return value of the sigmoid function g(X . theta), which needs
+        to be implemented on that class.
+
+        """
+
+        return matrix
 
     @staticmethod
     def normalize_features(x):
         """
-        :param x: matrix of m examples by n features
-        :return: normalized features matrix
+        :param x: numpy array of m examples by n features
+        :return: numpy array of normalized features
 
         Normalizes the features matrix
 
@@ -166,7 +159,6 @@ class LinearRegression:
 
     @staticmethod
     def plot_costs(costs):
-
         """
         :param costs: 2-D array, consisting of the
         number of iterations and associated cost
