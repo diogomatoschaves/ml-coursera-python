@@ -215,6 +215,29 @@ class Regression:
         return (x - x.mean(axis=0)) / x.std(axis=0)
 
     @staticmethod
+    def feature_mapping(x, order):
+
+        X = x.copy()
+
+        n_features = X.shape[1]
+        features = [i for i in range(n_features)]
+
+        for i in range(2, order + 1):
+
+            product_cases = list(product(features, repeat=i))
+
+            product_cases = [tuple(sorted(t)) for t in product_cases]
+            product_cases = list(set(product_cases))
+
+            for case in product_cases:
+                columns = np.array([x[:, int(col)] for col in case]).T
+                columns_prod = np.cumprod(columns, axis=1)[:, -1].reshape(-1, 1)
+
+                X = np.hstack((X, columns_prod))
+
+        return X
+
+    @staticmethod
     def plot_costs(costs):
         """
         :param costs: 2-D array, consisting of the
