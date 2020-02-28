@@ -9,10 +9,17 @@ class LogisticRegression(Regression):
     """
 
     def __init__(
-        self, max_iter=1000, learning_rate=0.01, normalize=False,
+        self,
+        max_iter=1000,
+        learning_rate=0.01,
+        normalize=False,
+        reg_param=0,
+        reg_method="ridge",
     ):
 
-        Regression.__init__(self, max_iter, learning_rate, normalize)
+        Regression.__init__(
+            self, max_iter, learning_rate, normalize, reg_param, reg_method
+        )
 
     def predict(self, x):
 
@@ -55,12 +62,13 @@ class LogisticRegression(Regression):
 
         return score
 
-    def _cost_function(self, X, y, theta):
+    def _cost_function(self, X, y, theta, m):
 
         """
         :param X: matrix of m training examples and n + 1 features
         :param y: vector of m target values
         :param theta: vector of n + 1 parameters for target line
+        :param m: number of training examples
         :return: cost
 
         Computes the value of the cost function for a given X, y and theta
@@ -69,7 +77,7 @@ class LogisticRegression(Regression):
         J(theta) = (1 / m) * (- y' . log(h) - (1 - y)' . log(1 - h))
         """
 
-        self._cost = (1 / len(X)) * (
+        self._cost = (1 / m) * (
             -y.T @ np.log(self._sigmoid(X @ theta))
             - (1 - y).T @ np.log(1 - self._sigmoid(X @ theta))
         )

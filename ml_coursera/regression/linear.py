@@ -2,12 +2,13 @@ from ..regression.base_class import Regression
 import numpy as np
 
 
+STRATEGY_OPTIONS = {"gradient_descent", "normal_eq"}
+
+
 class LinearRegression(Regression):
 
     """
-
     Class for performing linear regression on a training set.
-
     """
 
     def __init__(
@@ -16,10 +17,18 @@ class LinearRegression(Regression):
         max_iter=1000,
         learning_rate=0.01,
         normalize=False,
+        reg_param=0,
+        reg_method="ridge",
     ):
 
-        Regression.__init__(self, max_iter, learning_rate, normalize)
-        self.strategy = strategy
+        Regression.__init__(
+            self, max_iter, learning_rate, normalize, reg_param, reg_method
+        )
+        self.strategy = (
+            strategy
+            if isinstance(strategy, str) and strategy.lower() in STRATEGY_OPTIONS
+            else "gradient_descent"
+        )
 
     def fit(self, x, y):
 
@@ -104,13 +113,14 @@ class LinearRegression(Regression):
 
         self.coefficients = theta
 
-    def _cost_function(self, X, y, theta):
+    def _cost_function(self, X, y, theta, m):
 
         """
         :param X: matrix of m training examples and n + 1 features
         :param y: vector of m target values
         :param theta: vector of n + 1 parameters for target line
-        :return: cost
+        :param m: number of training examples
+        :return: cost for a given theta
 
         Computes the value of the cost function for a given X, y and theta
         with the following equation:
@@ -118,6 +128,6 @@ class LinearRegression(Regression):
         J(theta) = (1 / 2m) * (X*theta - y)' (X*theta - y)
         """
 
-        self._cost = (1 / (2 * len(X))) * (X @ theta - y).T @ (X @ theta - y)
+        self._cost = (1 / (2 * m)) * ((X @ theta - y).T @ (X @ theta - y))
 
         return self._cost

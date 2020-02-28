@@ -1,23 +1,34 @@
 import matplotlib.pyplot as plt
 import numpy as np
+from itertools import product
+
+REGULARIZATION_OPTIONS = {"ridge", "lasso"}
 
 
 class Regression:
-
     """
     Base class for linear and logistic regression
     """
 
-    def __init__(self, max_iter, learning_rate, normalize):
+    def __init__(self, max_iter, learning_rate, normalize, reg_param, reg_method):
 
         self.coefficients = None
         self._cost = np.inf
         self.max_iter = max_iter
         self.learning_rate = learning_rate
-        self.threshold = learning_rate * 1e-3
+        self.threshold = learning_rate * 1e-4
         self.n_iter = None
         self.final_cost = None
         self.normalize = normalize
+        self.reg_param = (
+            reg_param if isinstance(reg_param, (int, float)) and reg_param >= 0 else 0
+        )
+        self.reg_method = (
+            reg_method
+            if isinstance(reg_method, str)
+               and reg_method.lower() in REGULARIZATION_OPTIONS
+            else "ridge"
+        )
 
     def fit(self, x, y):
 
@@ -76,12 +87,16 @@ class Regression:
 
         costs = np.empty(shape=(0, 2))
 
+        m = X.shape[0]
+
         i = 0
         while i < self.max_iter:
 
             prev_cost = self._cost
-            self._cost = self._cost_function(X, y, theta)
-            theta = theta - self.learning_rate * self._gradient(X, y, theta)
+            self._cost = self._regularized_cost(self._cost_function(X, y, theta, m), theta, m)
+            theta = self._regularized_theta(
+                theta, m
+            ) - self.learning_rate * self._gradient(X, y, theta, m)
 
             costs = np.vstack((costs, np.array([[i, self._cost]])))
 
@@ -90,7 +105,7 @@ class Regression:
 
             if self._cost - prev_cost > 0:
                 self.learning_rate = self.learning_rate * 0.1
-                self.threshold = self.learning_rate * 1e-3
+                self.threshold = self.learning_rate * 1e-4
                 print("Updated learning rate: {}: {}".format(i, self.learning_rate))
 
             i += 1
@@ -101,12 +116,13 @@ class Regression:
 
         self.plot_costs(costs)
 
-    def _gradient(self, X, y, theta):
+    def _gradient(self, X, y, theta, m):
 
         """
         :param X: training data matrix of m examples and n + 1 features
         :param y: vector of m target values
-        :param theta: vector of n + 1 parameters for target line
+        :param theta: vector of n + 1 parameters of target model
+        :param m: number of training examples
         :return: gradient for a given theta
 
         Computes the new values of theta according to gradient
@@ -114,13 +130,54 @@ class Regression:
 
         """
 
-        return (1 / X.shape[0]) * X.T @ (self._hypothesis(X @ theta) - y)
+        return (1 / m) * X.T @ (self._hypothesis(X @ theta) - y)
 
-    def _cost_function(self, X, y, theta):
+    def _regularized_theta(self, theta, m):
+        """
+        :param theta: vector of n + 1 parameters of target model
+        :param m: number of training examples
+        :return: theta vector with regularization
+
+        Subtracts the regularization term from theta for the Ridge
+        Regularization method, or leaves it unchanged for the
+        Lasso method.
+
+        """
+
+        if self.reg_method == "ridge":
+            reg_term = np.ones(shape=theta.shape) * (
+                    self.learning_rate * self.reg_param / m
+            )
+            reg_term[0] = 0
+            return theta * (1 - reg_term)
+        else:
+            return theta
+
+    def _regularized_cost(self, cost, theta, m):
+        """
+        :param cost: Unregularized cost for a given X and theta
+        :param theta: Current hypothesis theta
+        :param m: number of training examples
+        :return: Updated cost with regularized term
+
+        Returns the cost with the regularization term according to the
+        selected option (Ridge or Lasso)
+
+        """
+
+        if self.reg_method == "ridge":
+            return cost + (self.reg_param / (2 * m)) * theta[1:] @ theta[1:]
+        elif self.reg_method == "lasso":
+            return cost + (self.reg_param / (2 * m)) * theta[1:].sum()
+        else:
+            return cost
+
+    def _cost_function(self, X, y, theta, m):
         """
         :param X: matrix of m training examples and n + 1 features
         :param y: vector of m target values
         :param theta: vector of n + 1 parameters for target line
+        :param m: number of training examples
         :return: cost
 
         Computes the value of the cost function for a given X, y and theta
