@@ -1,5 +1,6 @@
 from ..regression.base_class import Regression
 import numpy as np
+from ..preprocessing import normalize_features
 
 
 STRATEGY_OPTIONS = {"gradient_descent", "normal_eq"}
@@ -64,7 +65,7 @@ class LinearRegression(Regression):
             return None
 
         if self.normalize:
-            x = self.normalize_features(x)
+            x = normalize_features(x)
 
         X = np.c_[np.ones(x.shape[0]), x]
 
