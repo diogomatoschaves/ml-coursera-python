@@ -1,10 +1,12 @@
 import matplotlib.pyplot as plt
 import numpy as np
+from abc import ABCMeta, abstractmethod
+from ..preprocessing import normalize_features
 
 REGULARIZATION_OPTIONS = {"ridge", "lasso"}
 
 
-class Regression:
+class Regression(metaclass=ABCMeta):
     """
     Base class for linear and logistic regression
     """
@@ -43,6 +45,7 @@ class Regression:
 
         self._gradient_descent_fit(x, y)
 
+    @abstractmethod
     def predict(self, x):
 
         """
@@ -55,6 +58,7 @@ class Regression:
 
         raise NotImplementedError
 
+    @abstractmethod
     def score(self, x, y_true):
         """
         :param x: m x n array of m examples by n features
@@ -79,7 +83,7 @@ class Regression:
         """
 
         if self.normalize:
-            x = self.normalize_features(x)
+            x = normalize_features(x)
 
         X = np.c_[np.ones(x.shape[0]), x]
         theta = np.zeros(X.shape[1])
@@ -171,6 +175,7 @@ class Regression:
         else:
             return cost
 
+    @abstractmethod
     def _cost_function(self, X, y, theta, m):
         """
         :param X: matrix of m training examples and n + 1 features
