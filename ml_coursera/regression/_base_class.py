@@ -1,7 +1,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from abc import ABCMeta, abstractmethod
-from ..preprocessing import normalize_features
+from ml_coursera.preprocessing import normalize_features
+from ml_coursera.utils import plot_costs
 
 REGULARIZATION_OPTIONS = {"ridge", "lasso"}
 
