@@ -1,6 +1,6 @@
-from ..regression.base_class import Regression
+from ..regression._base_class import Regression
 import numpy as np
-from ..preprocessing import normalize_features
+from ml_coursera.preprocessing import normalize_features
 
 
 class LogisticRegression(Regression):
@@ -76,6 +76,7 @@ class LogisticRegression(Regression):
         with the following equation:
 
         J(theta) = (1 / m) * (- y' . log(h) - (1 - y)' . log(1 - h))
+
         """
 
         self._cost = (1 / m) * (

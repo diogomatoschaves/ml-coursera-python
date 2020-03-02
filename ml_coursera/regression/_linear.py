@@ -1,6 +1,6 @@
-from ..regression.base_class import Regression
+from ..regression._base_class import Regression
 import numpy as np
-from ..preprocessing import normalize_features
+from ml_coursera.preprocessing import normalize_features
 
 
 STRATEGY_OPTIONS = {"gradient_descent", "normal_eq"}
