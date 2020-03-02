@@ -82,7 +82,7 @@ class LinearRegression(Regression):
 
         """
 
-        y_pred = self.predict(x)
+        y_pred = self.predict(x).reshape(-1, 1)
 
         numerator = ((y_true - y_pred) ** 2).sum(axis=0, dtype=np.float64)
         denominator = ((y_true - np.average(y_true, axis=0)) ** 2).sum(
@@ -92,7 +92,7 @@ class LinearRegression(Regression):
         valid_score = denominator != 0 and numerator != 0
 
         if valid_score:
-            return 1 - numerator / denominator
+            return (1 - numerator / denominator)[0]
         else:
             return None
 
@@ -129,6 +129,4 @@ class LinearRegression(Regression):
         J(theta) = (1 / 2m) * (X*theta - y)' (X*theta - y)
         """
 
-        self._cost = (1 / (2 * m)) * ((X @ theta - y).T @ (X @ theta - y))
-
-        return self._cost
+        return (1 / (2 * m)) * ((X @ theta - y).T @ (X @ theta - y))

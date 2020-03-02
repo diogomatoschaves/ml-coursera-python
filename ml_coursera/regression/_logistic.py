@@ -41,7 +41,7 @@ class LogisticRegression(Regression):
 
         X = np.c_[np.ones(x.shape[0]), x]
 
-        predictions = self.coefficients.T @ X.T
+        predictions = X @ self.coefficients
 
         return np.array(list(map(lambda pred: 1 if pred > 0 else 0, predictions)))
 
@@ -57,7 +57,7 @@ class LogisticRegression(Regression):
 
         """
 
-        y_pred = self.predict(x)
+        y_pred = self.predict(x).reshape(-1, 1)
 
         score = (y_true == y_pred).mean()
 
@@ -78,12 +78,10 @@ class LogisticRegression(Regression):
         J(theta) = (1 / m) * (- y' . log(h) - (1 - y)' . log(1 - h))
         """
 
-        self._cost = (1 / m) * (
+        return (1 / m) * (
             -y.T @ np.log(self._sigmoid(X @ theta))
             - (1 - y).T @ np.log(1 - self._sigmoid(X @ theta))
         )
-
-        return self._cost
 
     def _hypothesis(self, matrix):
 

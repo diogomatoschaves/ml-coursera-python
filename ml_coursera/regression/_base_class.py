@@ -28,7 +28,7 @@ class Regression(metaclass=ABCMeta):
         self.reg_method = (
             reg_method
             if isinstance(reg_method, str)
-               and reg_method.lower() in REGULARIZATION_OPTIONS
+            and reg_method.lower() in REGULARIZATION_OPTIONS
             else "ridge"
         )
 
@@ -87,7 +87,7 @@ class Regression(metaclass=ABCMeta):
             x = normalize_features(x)
 
         X = np.c_[np.ones(x.shape[0]), x]
-        theta = np.zeros(X.shape[1])
+        theta = np.zeros(X.shape[1]).reshape(-1, 1)
 
         costs = np.empty(shape=(0, 2))
 
@@ -97,10 +97,15 @@ class Regression(metaclass=ABCMeta):
         while i < self.max_iter:
 
             prev_cost = self._cost
-            self._cost = self._regularized_cost(self._cost_function(X, y, theta, m), theta, m)
-            theta = self._regularized_theta(
-                theta, m
-            ) - self.learning_rate * self._gradient(X, y, theta, m)
+            self._cost = self._regularized_cost(
+                self._cost_function(X, y, theta, m), theta, m
+            )
+
+            reg_theta = self._regularized_theta(theta, m)
+
+            grad = self.learning_rate * self._gradient(X, y, theta, m)
+
+            theta = reg_theta - grad
 
             costs = np.vstack((costs, np.array([[i, self._cost]])))
 
@@ -118,7 +123,7 @@ class Regression(metaclass=ABCMeta):
         self.n_iter = i
         self.final_cost = self._cost
 
-        self.plot_costs(costs)
+        plot_costs(costs)
 
     def _gradient(self, X, y, theta, m):
 
@@ -150,7 +155,7 @@ class Regression(metaclass=ABCMeta):
 
         if self.reg_method == "ridge":
             reg_term = np.ones(shape=theta.shape) * (
-                    self.learning_rate * self.reg_param / m
+                self.learning_rate * self.reg_param / m
             )
             reg_term[0] = 0
             return theta * (1 - reg_term)
@@ -170,7 +175,7 @@ class Regression(metaclass=ABCMeta):
         """
 
         if self.reg_method == "ridge":
-            return cost + (self.reg_param / (2 * m)) * theta[1:] @ theta[1:]
+            return cost + (self.reg_param / (2 * m)) * theta[1:].T @ theta[1:]
         elif self.reg_method == "lasso":
             return cost + (self.reg_param / (2 * m)) * theta[1:].sum()
         else:
@@ -206,20 +211,3 @@ class Regression(metaclass=ABCMeta):
         """
 
         return matrix
-
-    @staticmethod
-    def plot_costs(costs):
-        """
-        :param costs: 2-D array, consisting of the
-        number of iterations and associated cost
-        :return: None
-        """
-
-        plt.figure(figsize=(10, 10))
-
-        plt.plot(costs[:, 0], costs[:, 1])
-
-        plt.xlabel("Nr Iterations")
-        plt.ylabel("J(\u03B8)")
-
-        plt.show()
