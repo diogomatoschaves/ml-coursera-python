@@ -34,7 +34,7 @@ def feature_mapping(x, order, intercept=False):
 
     X = x.copy()
 
-    n_features = X.shape[1]
+    n_features = X.shape[1] if len(X.shape) > 1 else 1
     features = [i for i in range(n_features)]
 
     for i in range(2, order + 1):
