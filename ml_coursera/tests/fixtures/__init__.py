@@ -1,0 +1,1 @@
+from ml_coursera.tests.fixtures.preprocessing.normalize import single_array_all_ones
