@@ -11,7 +11,7 @@ class LogisticRegression(Regression):
 
     def __init__(
         self,
-        max_iter=1000,
+        max_iter=10000,
         learning_rate=0.01,
         normalize=False,
         reg_param=0,

@@ -109,10 +109,10 @@ class Regression(metaclass=ABCMeta):
 
             costs = np.vstack((costs, np.array([[i, self._cost]])))
 
-            if abs(self._cost - prev_cost) < self.threshold:
+            if self._cost - prev_cost > 0 and i > 20:
                 break
 
-            if self._cost - prev_cost > 0:
+            elif self._cost - prev_cost > 0:
                 self.learning_rate = self.learning_rate * 0.1
                 self.threshold = self.learning_rate * 1e-4
                 print("Updated learning rate: {}: {}".format(i, self.learning_rate))

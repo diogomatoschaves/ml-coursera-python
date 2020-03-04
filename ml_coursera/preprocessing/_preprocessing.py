@@ -13,7 +13,17 @@ def normalize_features(x):
 
     x = np.array(x)
 
-    return (x - x.mean(axis=0)) / x.std(axis=0)
+    mean = x.mean(axis=0)
+    std = x.std(axis=0)
+
+    with np.errstate(invalid="ignore"):
+        normalized_x = (x - mean) / std
+
+    for i, std_val in enumerate(std):
+        if std_val == 0:
+            normalized_x[:, i] = x[:, i]
+
+    return normalized_x
 
 
 def feature_mapping(x, order, intercept=False):
@@ -31,8 +41,7 @@ def feature_mapping(x, order, intercept=False):
     [a b a^2 ab b^2 a^3 a^2b ab^2 b^3]
 
     """
-
-    X = x.copy()
+    X = np.array(x).copy()
 
     n_features = X.shape[1] if len(X.shape) > 1 else 1
     features = [i for i in range(n_features)]

@@ -15,7 +15,7 @@ class LinearRegression(Regression):
     def __init__(
         self,
         strategy="gradient_descent",
-        max_iter=1000,
+        max_iter=10000,
         learning_rate=0.01,
         normalize=False,
         reg_param=0,
@@ -42,6 +42,12 @@ class LinearRegression(Regression):
         to the chosen strategy
 
         """
+
+        if len(x.shape) == 1:
+            x = x.reshape(-1, 1)
+
+        if len(y.shape) == 1:
+            y = y.reshape(-1, 1)
 
         if self.strategy == "gradient_descent":
             self._gradient_descent_fit(x, y)
