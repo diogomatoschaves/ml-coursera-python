@@ -19,6 +19,8 @@ max_iter = 1500
 
 learning_rate = 0.01
 
+normalize = False
+
 expected_theta = np.array([[-3.630], [1.166]])
 
 expected_predictions = (

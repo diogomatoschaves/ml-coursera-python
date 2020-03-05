@@ -36,9 +36,10 @@ fixtures = [
     "single_array_gradient_descent",
     "single_array_normal_equation",
     "single_array_wrong_input_strategy",
-    'multi_array_gradient_descent',
-    'multi_array_normal_equation',
+    "multi_array_gradient_descent",
+    "multi_array_normal_equation",
 ]
+
 
 class TestLinearRegression:
 
@@ -78,14 +79,24 @@ class TestLinearRegression:
         ],
     )
     def test_coefficients(
-        self, mock_matplotlib, data, strategy, max_iter, learning_rate, normalize, expected_result
+        self,
+        mock_matplotlib,
+        data,
+        strategy,
+        max_iter,
+        learning_rate,
+        normalize,
+        expected_result,
     ):
 
         X = data[:, :-1]
         y = data[:, -1]
 
         reg = LinearRegression(
-            strategy=strategy, max_iter=max_iter, learning_rate=learning_rate, normalize=normalize
+            strategy=strategy,
+            max_iter=max_iter,
+            learning_rate=learning_rate,
+            normalize=normalize,
         )
         reg.fit(X, y)
 
@@ -107,14 +118,24 @@ class TestLinearRegression:
         ],
     )
     def test_predictions(
-        self, mock_matplotlib, data, strategy, max_iter, learning_rate, normalize, expected_result
+        self,
+        mock_matplotlib,
+        data,
+        strategy,
+        max_iter,
+        learning_rate,
+        normalize,
+        expected_result,
     ):
 
         X = data[:, :-1]
         y = data[:, -1]
 
         reg = LinearRegression(
-            strategy=strategy, max_iter=max_iter, learning_rate=learning_rate, normalize=normalize
+            strategy=strategy,
+            max_iter=max_iter,
+            learning_rate=learning_rate,
+            normalize=normalize,
         )
         reg.fit(X, y)
 
@@ -132,14 +153,24 @@ class TestLinearRegression:
         ],
     )
     def test_score(
-            self, mock_matplotlib, data, strategy, max_iter, learning_rate, normalize, expected_result
+        self,
+        mock_matplotlib,
+        data,
+        strategy,
+        max_iter,
+        learning_rate,
+        normalize,
+        expected_result,
     ):
 
         X = data[:, :-1]
         y = data[:, -1]
 
         reg = LinearRegression(
-            strategy=strategy, max_iter=max_iter, learning_rate=learning_rate, normalize=normalize
+            strategy=strategy,
+            max_iter=max_iter,
+            learning_rate=learning_rate,
+            normalize=normalize,
         )
         reg.fit(X, y)
 
