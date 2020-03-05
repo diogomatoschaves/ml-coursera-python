@@ -22,6 +22,7 @@ class Regression(metaclass=ABCMeta):
         self.n_iter = None
         self.final_cost = None
         self.normalize = normalize
+        self.norm_params_ = None
         self.reg_param = (
             reg_param if isinstance(reg_param, (int, float)) and reg_param >= 0 else 0
         )
@@ -44,9 +45,21 @@ class Regression(metaclass=ABCMeta):
 
         """
 
-        self._gradient_descent_fit(x, y)
+        x = np.array(x)
+        y = np.array(y)
 
-    @abstractmethod
+        if len(x.shape) == 1:
+            x = x.reshape(-1, 1)
+
+        if len(y.shape) == 1:
+            y = y.reshape(-1, 1)
+
+        if self.normalize:
+            self.norm_params_ = np.array([x.mean(axis=0), x.std(axis=0)])
+            x = normalize_features(x)
+
+        return x, y
+
     def predict(self, x):
 
         """
@@ -57,7 +70,16 @@ class Regression(metaclass=ABCMeta):
 
         """
 
-        raise NotImplementedError
+        if self.coefficients is None:
+            print("There is no model fitted")
+            return None
+
+        if self.normalize:
+            x = normalize_features(x, self.norm_params_)
+
+        X = np.c_[np.ones(x.shape[0]), x]
+
+        return X @ self.coefficients
 
     @abstractmethod
     def score(self, x, y_true):
@@ -82,9 +104,6 @@ class Regression(metaclass=ABCMeta):
         the gradient descent strategy
 
         """
-
-        if self.normalize:
-            x = normalize_features(x)
 
         X = np.c_[np.ones(x.shape[0]), x]
         theta = np.zeros(X.shape[1]).reshape(-1, 1)

@@ -2,9 +2,10 @@ import numpy as np
 from itertools import product
 
 
-def normalize_features(x):
+def normalize_features(x, norm_params_=None):
     """
     :param x: numpy array of m examples by n features
+    :param norm_params_: Optional: mean and std to be used in normalization
     :return: numpy array of normalized features
 
     Normalizes the features matrix
@@ -13,8 +14,9 @@ def normalize_features(x):
 
     x = np.array(x)
 
-    mean = x.mean(axis=0)
-    std = x.std(axis=0)
+    [mean, std] = (
+        [x.mean(axis=0), x.std(axis=0)] if norm_params_ is None else norm_params_
+    )
 
     with np.errstate(invalid="ignore"):
         normalized_x = (x - mean) / std

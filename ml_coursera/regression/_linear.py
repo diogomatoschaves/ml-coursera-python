@@ -30,6 +30,7 @@ class LinearRegression(Regression):
             if isinstance(strategy, str) and strategy.lower() in STRATEGY_OPTIONS
             else "gradient_descent"
         )
+        self.norm_coeff_ = None
 
     def fit(self, x, y):
 
@@ -43,11 +44,7 @@ class LinearRegression(Regression):
 
         """
 
-        if len(x.shape) == 1:
-            x = x.reshape(-1, 1)
-
-        if len(y.shape) == 1:
-            y = y.reshape(-1, 1)
+        x, y = super(LinearRegression, self).fit(x, y)
 
         if self.strategy == "gradient_descent":
             self._gradient_descent_fit(x, y)
@@ -66,16 +63,7 @@ class LinearRegression(Regression):
 
         """
 
-        if self.coefficients is None:
-            print("There is no model fitted")
-            return None
-
-        if self.normalize:
-            x = normalize_features(x)
-
-        X = np.c_[np.ones(x.shape[0]), x]
-
-        return self.coefficients.T @ X.T
+        return super(LinearRegression, self).predict(x)
 
     def score(self, x, y_true):
         """
@@ -100,7 +88,7 @@ class LinearRegression(Regression):
         valid_score = denominator != 0 and numerator != 0
 
         if valid_score:
-            return (1 - numerator / denominator)
+            return 1 - numerator / denominator
         else:
             return None
 

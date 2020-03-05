@@ -22,6 +22,12 @@ class LogisticRegression(Regression):
             self, max_iter, learning_rate, normalize, reg_param, reg_method
         )
 
+    def fit(self, x, y):
+
+        x, y = super(LogisticRegression, self).fit(x, y)
+
+        self._gradient_descent_fit(x, y)
+
     def predict(self, x):
 
         """
@@ -32,16 +38,7 @@ class LogisticRegression(Regression):
 
         """
 
-        if self.coefficients is None:
-            print("There is no model fitted")
-            return None
-
-        if self.normalize:
-            x = normalize_features(x)
-
-        X = np.c_[np.ones(x.shape[0]), x]
-
-        predictions = X @ self.coefficients
+        predictions = super(LogisticRegression, self).predict(x)
 
         return np.array(list(map(lambda pred: 1 if pred > 0 else 0, predictions)))
 
