@@ -115,17 +115,34 @@ class TestLinearRegression:
         )
         reg.fit(X, y)
 
-        print(reg.coefficients)
-
         pred = reg.predict(X)
 
         assert np.allclose(pred.ravel(), expected_result, atol=1e-3)
 
-        assert (
-            reg.strategy == strategy
-            if strategy in STRATEGY_OPTIONS
-            else reg.strategy == "gradient_descent"
+    @pytest.mark.parametrize(
+        "data,strategy,max_iter,learning_rate,expected_result",
+        [
+            pytest.param(
+                *get_test_fixture(fixture, "linear", "expected_score"), id=fixture
+            )
+            for fixture in fixtures
+        ],
+    )
+    def test_score(
+            self, mock_matplotlib, data, strategy, max_iter, learning_rate, expected_result
+    ):
+
+        X = data[:, :-1]
+        y = data[:, 1]
+
+        reg = LinearRegression(
+            strategy=strategy, max_iter=max_iter, learning_rate=learning_rate
         )
+        reg.fit(X, y)
+
+        score = reg.score(X, y)
+
+        assert np.allclose([score], [expected_result], atol=1e-3)
 
 
 class TestLogisticRegression:

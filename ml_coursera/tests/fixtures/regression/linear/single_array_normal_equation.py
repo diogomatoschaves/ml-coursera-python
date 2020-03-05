@@ -29,3 +29,5 @@ expected_predictions = (
     .to_numpy()
     .ravel()
 )
+
+expected_score = 0.702

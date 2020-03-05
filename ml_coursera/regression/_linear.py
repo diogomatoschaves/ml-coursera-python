@@ -88,7 +88,9 @@ class LinearRegression(Regression):
 
         """
 
-        y_pred = self.predict(x).reshape(-1, 1)
+        y_true = np.array(y_true).ravel()
+
+        y_pred = self.predict(x).ravel()
 
         numerator = ((y_true - y_pred) ** 2).sum(axis=0, dtype=np.float64)
         denominator = ((y_true - np.average(y_true, axis=0)) ** 2).sum(
@@ -98,7 +100,7 @@ class LinearRegression(Regression):
         valid_score = denominator != 0 and numerator != 0
 
         if valid_score:
-            return (1 - numerator / denominator)[0]
+            return (1 - numerator / denominator)
         else:
             return None
 
