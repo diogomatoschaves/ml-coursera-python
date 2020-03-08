@@ -5,7 +5,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from ml_coursera.regression import (
     LinearRegression,
-    LogisticRegression,
     STRATEGY_OPTIONS,
 )
 from ml_coursera.tests.mocks.plt import mock_show
@@ -177,16 +176,3 @@ class TestLinearRegression:
         score = reg.score(X, y)
 
         assert np.allclose([score], [expected_result], atol=1e-3)
-
-
-class TestLogisticRegression:
-    def test_sigmoid_function(self):
-
-        sigmoid = LogisticRegression()._sigmoid
-
-        x = np.array([-np.inf, -1, 0, 1, np.inf])
-
-        assert np.allclose(sigmoid(x), np.array([0, 0.268, 0.5, 0.731, 1]), atol=1e-3)
-
-    def test_cost_function(self):
-        pass
