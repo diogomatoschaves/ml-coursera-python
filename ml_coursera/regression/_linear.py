@@ -123,6 +123,9 @@ class LinearRegression(Regression):
         with the following equation:
 
         J(theta) = (1 / 2m) * (X*theta - y)' (X*theta - y)
+
         """
 
-        return (1 / (2 * m)) * ((X @ theta - y).T @ (X @ theta - y))
+        reg_cost = super(LinearRegression, self)._cost_function(X, y, theta, m)
+
+        return (1 / (2 * m)) * ((X @ theta - y).T @ (X @ theta - y)) + reg_cost

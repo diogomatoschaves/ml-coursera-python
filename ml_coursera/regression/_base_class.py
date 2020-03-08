@@ -116,15 +116,9 @@ class Regression(metaclass=ABCMeta):
         while i < self.max_iter:
 
             prev_cost = self._cost
-            self._cost = self._regularized_cost(
-                self._cost_function(X, y, theta, m), theta, m
-            )
+            self._cost = self._cost_function(X, y, theta, m)
 
-            reg_theta = self._regularized_theta(theta, m)
-
-            grad = self.learning_rate * self._gradient(X, y, theta, m)
-
-            theta = reg_theta - grad
+            theta = theta - self.learning_rate * self._gradient(X, y, theta, m)
 
             costs = np.vstack((costs, np.array([[i, self._cost]])))
 
@@ -158,49 +152,14 @@ class Regression(metaclass=ABCMeta):
 
         """
 
-        return (1 / m) * X.T @ (self._hypothesis(X @ theta) - y)
-
-    def _regularized_theta(self, theta, m):
-        """
-        :param theta: vector of n + 1 parameters of target model
-        :param m: number of training examples
-        :return: theta vector with regularization
-
-        Subtracts the regularization term from theta for the Ridge
-        Regularization method, or leaves it unchanged for the
-        Lasso method.
-
-        """
-
         if self.reg_method == "ridge":
-            reg_term = np.ones(shape=theta.shape) * (
-                self.learning_rate * self.reg_param / m
-            )
+            reg_term = np.ones(shape=theta.shape) * (self.reg_param / m) * theta
             reg_term[0] = 0
-            return theta * (1 - reg_term)
         else:
-            return theta
+            reg_term = np.zeros(shape=theta.shape)
 
-    def _regularized_cost(self, cost, theta, m):
-        """
-        :param cost: Unregularized cost for a given X and theta
-        :param theta: Current hypothesis theta
-        :param m: number of training examples
-        :return: Updated cost with regularized term
+        return (1 / m) * X.T @ (self._hypothesis(X @ theta) - y) + reg_term
 
-        Returns the cost with the regularization term according to the
-        selected option (Ridge or Lasso)
-
-        """
-
-        if self.reg_method == "ridge":
-            return cost + (self.reg_param / (2 * m)) * theta[1:].T @ theta[1:]
-        elif self.reg_method == "lasso":
-            return cost + (self.reg_param / (2 * m)) * theta[1:].sum()
-        else:
-            return cost
-
-    @abstractmethod
     def _cost_function(self, X, y, theta, m):
         """
         :param X: matrix of m training examples and n + 1 features
@@ -215,7 +174,12 @@ class Regression(metaclass=ABCMeta):
 
         """
 
-        raise NotImplementedError
+        if self.reg_method == "ridge":
+            return (self.reg_param / (2 * m)) * theta[1:].T @ theta[1:]
+        elif self.reg_method == "lasso":
+            return (self.reg_param / (2 * m)) * theta[1:].sum()
+        else:
+            return 0
 
     def _hypothesis(self, matrix):
         """

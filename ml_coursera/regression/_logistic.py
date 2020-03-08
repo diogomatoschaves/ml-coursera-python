@@ -54,7 +54,7 @@ class LogisticRegression(Regression):
 
         """
 
-        y_pred = self.predict(x).reshape(-1, 1)
+        y_pred = self.predict(x)
 
         score = (y_true == y_pred).mean()
 
@@ -75,11 +75,12 @@ class LogisticRegression(Regression):
         J(theta) = (1 / m) * (- y' . log(h) - (1 - y)' . log(1 - h))
 
         """
+        reg_cost = super(LogisticRegression, self)._cost_function(X, y, theta, m)
 
         return (1 / m) * (
-            -y.T @ np.log(self._sigmoid(X @ theta))
+            -1 * y.T @ np.log(self._sigmoid(X @ theta))
             - (1 - y).T @ np.log(1 - self._sigmoid(X @ theta))
-        )
+        ) + reg_cost
 
     def _hypothesis(self, matrix):
 
