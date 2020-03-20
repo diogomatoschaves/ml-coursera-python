@@ -14,7 +14,8 @@ def get_test_fixture(test_case, func):
 
     if func == "mapping":
         order = getattr(module, "order")
-        return base_array, expected_array, order
+        only_self_terms = getattr(module, "only_self_terms")
+        return base_array, expected_array, order, only_self_terms
 
     return base_array, expected_array
 
@@ -50,19 +51,20 @@ fixtures = [
     "2D_array_mixed_order_2",
     "2D_array_mixed_order_3",
     "2D_array_mixed_order_5",
+    "2D_array_only_self_terms_mixed_5"
 ]
 
 
 @pytest.mark.parametrize(
-    "base_array,expected_array,order",
+    "base_array,expected_array,order,only_self_terms",
     [
         pytest.param(*get_test_fixture(fixture, "mapping"), id=fixture)
         for fixture in fixtures
     ],
 )
-def test_feature_mapping(base_array, expected_array, order):
+def test_feature_mapping(base_array, expected_array, order, only_self_terms):
 
-    output_array = feature_mapping(base_array, order)
+    output_array = feature_mapping(base_array, order, only_self_terms=only_self_terms)
 
     print(output_array)
     print(expected_array)

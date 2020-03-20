@@ -3,6 +3,8 @@ import numpy as np
 
 order = 2
 
+only_self_terms = False
+
 base_array = np.array([[2, 3], [4, 1], [3, 2], [5, 4]])
 
 expected_array = np.array(
