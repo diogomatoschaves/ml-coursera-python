@@ -1,8 +1,7 @@
-import matplotlib.pyplot as plt
 import numpy as np
 from abc import ABCMeta, abstractmethod
 from ml_coursera.preprocessing import normalize_features
-from ml_coursera.utils import plot_costs
+from ml_coursera.utils import plot_costs, plot_learning_curves
 
 REGULARIZATION_OPTIONS = {"ridge", "lasso"}
 
@@ -94,7 +93,45 @@ class Regression(metaclass=ABCMeta):
 
         raise NotImplementedError
 
-    def _gradient_descent_fit(self, x, y):
+    def learning_curve(self, x, y, x_test, y_test):
+        """
+        Calculates and plots the learning curve for a given training and test sets
+        by splitting the training set in 20 iterations.
+
+        :param x: training features
+        :param y: training labels
+        :param x_test: test features
+        :param y_test: test labels
+        :return: training and test errors
+        """
+
+        m = x.shape[0]
+
+        interval = np.floor(m / 20) if m > 20 else 1
+
+        m_lst = np.arange(1, m + 1)[(np.arange(0, m) % interval) == 0]
+
+        err_train = np.zeros(m_lst.size)
+        err_test = np.zeros(m_lst.size)
+
+        for i, n in enumerate(m_lst):
+
+            x_subset = x[:n, :]
+            y_subset = y[:n]
+
+            theta = self._gradient_descent_fit(x_subset, y_subset, plot_costs_iter=False)
+
+            x_subset_adj = np.c_[np.ones(n), x_subset]
+            x_test_adj = np.c_[np.ones(x_test.shape[0]), x_test]
+
+            err_train[i] = self._cost_function(x_subset_adj, y_subset, theta, lambda_=0)
+            err_test[i] = self._cost_function(x_test_adj, y_test, theta, lambda_=0)
+
+        plot_learning_curves(err_train, err_test, m_lst)
+
+        return err_train, err_test
+
+    def _gradient_descent_fit(self, x, y, plot_costs_iter=True, learning_rate=None):
         """
         :param x: matrix with m training examples x n features
         :param y: vector with m target values
@@ -104,6 +141,9 @@ class Regression(metaclass=ABCMeta):
         the gradient descent strategy
 
         """
+
+        if not learning_rate:
+            learning_rate = self.learning_rate
 
         X = np.c_[np.ones(x.shape[0]), x]
         theta = np.zeros(X.shape[1]).reshape(-1, 1)
@@ -116,9 +156,9 @@ class Regression(metaclass=ABCMeta):
         while i < self.max_iter:
 
             prev_cost = self._cost
-            self._cost = self._cost_function(X, y, theta, m)
+            self._cost = self._cost_function(X, y, theta)
 
-            theta = theta - self.learning_rate * self._gradient(X, y, theta, m)
+            theta = theta - learning_rate * self._gradient(X, y, theta, m)
 
             costs = np.vstack((costs, np.array([[i, self._cost]])))
 
@@ -126,9 +166,8 @@ class Regression(metaclass=ABCMeta):
                 break
 
             elif self._cost - prev_cost > 0:
-                self.learning_rate = self.learning_rate * 0.1
-                self.threshold = self.learning_rate * 1e-4
-                print("Updated learning rate: {}: {}".format(i, self.learning_rate))
+                learning_rate = learning_rate * 0.1
+                self.threshold = learning_rate * 1e-4
 
             i += 1
 
@@ -136,9 +175,12 @@ class Regression(metaclass=ABCMeta):
         self.n_iter = i
         self.final_cost = self._cost
 
-        plot_costs(costs)
+        if plot_costs_iter:
+            plot_costs(costs)
 
-    def _gradient(self, X, y, theta, m):
+        return theta
+
+    def _gradient(self, X, y, theta, m, lambda_=None):
 
         """
         :param X: training data matrix of m examples and n + 1 features
@@ -152,15 +194,18 @@ class Regression(metaclass=ABCMeta):
 
         """
 
+        if not lambda_:
+            lambda_ = self.reg_param
+
         if self.reg_method == "ridge":
-            reg_term = np.ones(shape=theta.shape) * (self.reg_param / m) * theta
+            reg_term = np.ones(shape=theta.shape) * (lambda_ / m) * theta
             reg_term[0] = 0
         else:
             reg_term = np.zeros(shape=theta.shape)
 
         return (1 / m) * X.T @ (self._hypothesis(X @ theta) - y) + reg_term
 
-    def _cost_function(self, X, y, theta, m):
+    def _cost_function(self, X, y, theta, lambda_=None):
         """
         :param X: matrix of m training examples and n + 1 features
         :param y: vector of m target values
@@ -174,10 +219,15 @@ class Regression(metaclass=ABCMeta):
 
         """
 
+        if not lambda_:
+            lambda_ = self.reg_param
+
+        m = X.shape[0]
+
         if self.reg_method == "ridge":
-            return (self.reg_param / (2 * m)) * theta[1:].T @ theta[1:]
+            return (lambda_ / (2 * m)) * theta[1:].T @ theta[1:]
         elif self.reg_method == "lasso":
-            return (self.reg_param / (2 * m)) * theta[1:].sum()
+            return (lambda_ / (2 * m)) * theta[1:].sum()
         else:
             return 0
 

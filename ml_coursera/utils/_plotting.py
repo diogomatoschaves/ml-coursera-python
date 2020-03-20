@@ -134,3 +134,23 @@ def plot_costs(costs):
     plt.ylabel("J(\u03B8)")
 
     plt.show()
+    
+
+def plot_learning_curves(error_train, error_test, m_lst):
+    """
+    Plots the learning curve for a given training and test sets.
+
+    :param error_train: vector of training errors
+    :param error_test: vector of test errors
+    :param m_lst: vector of training examples used to calculate errors
+    :return: None
+    """
+
+    plt.figure()
+    
+    plt.plot(m_lst, error_train, m_lst, error_test, lw=2)
+    plt.title('Learning curve for linear regression')
+    plt.legend(['Train', 'Cross Validation'])
+    plt.xlabel('Number of training examples')
+    plt.ylabel('Error')
+    plt.show()

@@ -62,10 +62,10 @@ class TestLinearRegression:
         y = data[:, -1]
 
         assert np.allclose(
-            [cost_function(X, y, theta_1, m)], [expected_cost_1], atol=1e-2
+            [cost_function(X, y, theta_1)], [expected_cost_1], atol=1e-2
         )
         assert np.allclose(
-            [cost_function(X, y, theta_2, m)], [expected_cost_2], atol=1e-2
+            [cost_function(X, y, theta_2)], [expected_cost_2], atol=1e-2
         )
 
     @pytest.mark.parametrize(

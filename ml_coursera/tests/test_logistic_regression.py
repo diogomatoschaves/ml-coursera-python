@@ -75,7 +75,7 @@ class TestLogisticRegression:
             cost_function = reg._cost_function
             gradient = reg._gradient
 
-            assert np.allclose([cost_function(X, y, theta, m)], [cost], atol=1e-2)
+            assert np.allclose([cost_function(X, y, theta)], [cost], atol=1e-2)
 
             assert np.allclose(gradient(X, y, theta, m)[:5], grad, atol=1e-1)
 

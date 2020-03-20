@@ -60,7 +60,7 @@ class LogisticRegression(Regression):
 
         return score
 
-    def _cost_function(self, X, y, theta, m):
+    def _cost_function(self, X, y, theta, lambda_=None):
 
         """
         :param X: matrix of m training examples and n + 1 features
@@ -75,7 +75,13 @@ class LogisticRegression(Regression):
         J(theta) = (1 / m) * (- y' . log(h) - (1 - y)' . log(1 - h))
 
         """
-        reg_cost = super(LogisticRegression, self)._cost_function(X, y, theta, m)
+
+        if not lambda_:
+            lambda_ = self.reg_param
+
+        reg_cost = super(LogisticRegression, self)._cost_function(X, y, theta, lambda_)
+
+        m = X.shape[0]
 
         return (1 / m) * (
             -1 * y.T @ np.log(self._sigmoid(X @ theta))

@@ -110,7 +110,7 @@ class LinearRegression(Regression):
 
         self.coefficients = theta
 
-    def _cost_function(self, X, y, theta, m):
+    def _cost_function(self, X, y, theta, lambda_=None):
 
         """
         :param X: matrix of m training examples and n + 1 features
@@ -126,6 +126,11 @@ class LinearRegression(Regression):
 
         """
 
-        reg_cost = super(LinearRegression, self)._cost_function(X, y, theta, m)
+        if not lambda_:
+            lambda_ = self.reg_param
+
+        reg_cost = super(LinearRegression, self)._cost_function(X, y, theta, lambda_)
+
+        m = X.shape[0]
 
         return (1 / (2 * m)) * ((X @ theta - y).T @ (X @ theta - y)) + reg_cost
