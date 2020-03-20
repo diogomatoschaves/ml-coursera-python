@@ -1,7 +1,7 @@
 import numpy as np
 from abc import ABCMeta, abstractmethod
 from ml_coursera.preprocessing import normalize_features
-from ml_coursera.utils import plot_costs, plot_learning_curves
+from ml_coursera.utils import plot_costs, plot_learning_curve
 
 REGULARIZATION_OPTIONS = {"ridge", "lasso"}
 
@@ -127,11 +127,34 @@ class Regression(metaclass=ABCMeta):
             err_train[i] = self._cost_function(x_subset_adj, y_subset, theta, lambda_=0)
             err_test[i] = self._cost_function(x_test_adj, y_test, theta, lambda_=0)
 
-        plot_learning_curves(err_train, err_test, m_lst)
+        plot_learning_curve(err_train, err_test, m_lst)
 
         return err_train, err_test
 
-    def _gradient_descent_fit(self, x, y, plot_costs_iter=True, learning_rate=None):
+    def optimize_reg_param(self, x, y, x_test, y_test):
+
+        lambda_vec = np.array([0, 0.001, 0.003, 0.01, 0.03, 0.1, 0.3, 1, 3, 10, 30, 100, 300])
+
+        err_train = np.zeros(len(lambda_vec))
+        err_test = np.zeros(len(lambda_vec))
+
+        for i, l in enumerate(lambda_vec):
+
+            theta = self._gradient_descent_fit(x, y, plot_costs_iter=False, lambda_=l)
+
+            x_adj = np.c_[np.ones(x.shape[0]), x]
+            x_test_adj = np.c_[np.ones(x_test.shape[0]), x_test]
+
+            err_train[i] = self._cost_function(x_adj, y, theta, lambda_=0)
+            err_test[i] = self._cost_function(x_test_adj, y_test, theta, lambda_=0)
+
+        optimal_lambda = lambda_vec[np.argmin(err_test)]
+
+        plot_learning_curve(err_train, err_test, lambda_vec)
+
+        return optimal_lambda
+
+    def _gradient_descent_fit(self, x, y, plot_costs_iter=True, learning_rate=None, lambda_=None):
         """
         :param x: matrix with m training examples x n features
         :param y: vector with m target values
@@ -145,6 +168,9 @@ class Regression(metaclass=ABCMeta):
         if not learning_rate:
             learning_rate = self.learning_rate
 
+        if not lambda_:
+            lambda_ = self.reg_param
+
         X = np.c_[np.ones(x.shape[0]), x]
         theta = np.zeros(X.shape[1]).reshape(-1, 1)
 
@@ -156,9 +182,9 @@ class Regression(metaclass=ABCMeta):
         while i < self.max_iter:
 
             prev_cost = self._cost
-            self._cost = self._cost_function(X, y, theta)
+            self._cost = self._cost_function(X, y, theta, lambda_)
 
-            theta = theta - learning_rate * self._gradient(X, y, theta, m)
+            theta = theta - learning_rate * self._gradient(X, y, theta, lambda_)
 
             costs = np.vstack((costs, np.array([[i, self._cost]])))
 
@@ -180,7 +206,7 @@ class Regression(metaclass=ABCMeta):
 
         return theta
 
-    def _gradient(self, X, y, theta, m, lambda_=None):
+    def _gradient(self, X, y, theta, lambda_=None):
 
         """
         :param X: training data matrix of m examples and n + 1 features
@@ -196,6 +222,8 @@ class Regression(metaclass=ABCMeta):
 
         if not lambda_:
             lambda_ = self.reg_param
+
+        m = X.shape[0]
 
         if self.reg_method == "ridge":
             reg_term = np.ones(shape=theta.shape) * (lambda_ / m) * theta

@@ -77,7 +77,7 @@ class TestLogisticRegression:
 
             assert np.allclose([cost_function(X, y, theta)], [cost], atol=1e-2)
 
-            assert np.allclose(gradient(X, y, theta, m)[:5], grad, atol=1e-1)
+            assert np.allclose(gradient(X, y, theta)[:5], grad, atol=1e-1)
 
     @pytest.mark.parametrize(
         test_input_string,
